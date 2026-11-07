@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f2f0e8">
+  <meta name="description" content="A simple training-time tracker with history, sessions, and rollups.">
+  <link rel="icon" type="image/png" href="./icons/favicon.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./style.css?v=1">
+  <title>MATLOG — Training Tracker</title>
+</head>
+<body>
+<div class="app-shell">
+  <header class="site-head">
+    <div class="brand" aria-label="MATLOG training tracker">
+      <div class="brand-icon" aria-hidden="true"><span class="brand-lines">≡</span></div>
+      <div class="brand-word">MAT<span>LOG</span><small>TRAINING TRACKER</small></div>
+    </div>
+    <button class="icon-button" id="settingsBtn" type="button" aria-label="Data and backups">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.05.05-1.9 1.9-.05-.05A1.7 1.7 0 0 0 16 18.4l-1.42.6a1.7 1.7 0 0 0-1.08 1.56V21h-2.7v-.44A1.7 1.7 0 0 0 9.7 19l-1.42-.6a1.7 1.7 0 0 0-1.87.34l-.05.05-1.9-1.9.05-.05A1.7 1.7 0 0 0 4.85 15l-.6-1.42A1.7 1.7 0 0 0 2.7 12.5H2v-2.7h.7a1.7 1.7 0 0 0 1.56-1.08l.6-1.42a1.7 1.7 0 0 0-.34-1.87l-.05-.05 1.9-1.9.05.05A1.7 1.7 0 0 0 8.3 3.2l1.42-.6A1.7 1.7 0 0 0 10.8 1h2.7v.44A1.7 1.7 0 0 0 14.58 3l1.42.6a1.7 1.7 0 0 0 1.87-.34l.05-.05 1.9 1.9-.05.05a1.7 1.7 0 0 0-.34 1.87l.6 1.42A1.7 1.7 0 0 0 21.58 9.5H22v2.7h-.42A1.7 1.7 0 0 0 20 13.28Z"/></svg>
+    </button>
+  </header>
+  <div class="top-divider"></div>
+  <nav class="primary-nav" aria-label="Main navigation" id="primaryNav">
+    <button class="nav-tab is-active" type="button" data-tab="overview">OVERVIEW</button>
+    <button class="nav-tab" type="button" data-tab="log">TRAINING LOG</button>
+    <button class="nav-tab" type="button" data-tab="rollups">ROLLUPS</button>
+  </nav>
+  <section class="period-selector" aria-label="Filter by year">
+    <div class="year-label">PERIOD</div>
+    <div class="years" id="yearTabs"></div>
+  </section>
+  <main id="main" aria-live="polite">
+    <div class="loading">Loading your training history…</div>
+  </main>
+  <footer class="page-footer"><span>MATLOG</span><span id="footerStatus">PRIVATE · DEVICE STORAGE</span></footer>
+</div>
+<button class="floating-plus" id="addBtn" type="button" aria-label="Add training entry" title="Add a training entry">
+  <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 4v16M4 12h16" /></svg>
+</button>
+<div id="sheetBackdrop" class="sheet-backdrop" hidden></div>
+<section id="entrySheet" class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <div class="sheet-grabber" aria-hidden="true"></div>
+  <div class="sheet-head">
+    <div><div class="eyebrow">SESSION ENTRY</div><h2 id="sheetTitle">Add training</h2></div>
+    <button class="close-button" id="closeEntry" type="button" aria-label="Close">×</button>
+  </div>
+  <form id="entryForm">
+    <div class="field"><label for="sessionDate">DATE</label><input id="sessionDate" type="date" required></div>
+    <div class="field"><label>TRAINING TYPE</label>
+      <div class="type-picker" id="typePicker">
+        <button type="button" data-type="Gi|Gi" class="type-choice selected">GI CLASS</button>
+        <button type="button" data-type="No-Gi|No-Gi" class="type-choice">NO-GI CLASS</button>
+        <button type="button" data-type="Open Mat|Gi" class="type-choice">GI OPEN MAT</button>
+        <button type="button" data-type="Open Mat|No-Gi" class="type-choice">NO-GI OPEN MAT</button>
+        <button type="button" data-type="Coaching|Other" class="type-choice">COACHING</button>
+      </div>
+    </div>
+    <div class="field"><label for="sessionHours">TRAINING TIME · HOURS</label>
+      <input id="sessionHours" type="number" inputmode="decimal" min="0.25" max="24" step="0.25" value="1" required>
+      <div class="quick-times" id="quickTimes">
+        <button type="button" data-hours="0.5">30m</button><button type="button" data-hours="1">1h</button><button type="button" data-hours="1.5">1.5h</button><button type="button" data-hours="2">2h</button><button type="button" data-hours="2.5">2.5h</button>
+      </div>
+    </div>
+    <div class="field"><label for="sessionGym">SCHOOL / LOCATION <span>OPTIONAL</span></label>
+      <input id="sessionGym" type="text" list="gymSuggestions" placeholder="Enter school or location" autocomplete="off" maxlength="110">
+      <datalist id="gymSuggestions"></datalist>
+    </div>
+    <div class="field"><label for="sessionTechnique">TECHNIQUE / TRAINING FOCUS <span>OPTIONAL</span></label>
+      <textarea id="sessionTechnique" rows="2" placeholder="What did you work on?"></textarea>
+    </div>
+    <div class="field"><label for="sessionNote">OTHER NOTES <span>OPTIONAL</span></label>
+      <textarea id="sessionNote" rows="2" placeholder="Extra details about this session"></textarea>
+    </div>
+    <label class="switch-label"><input id="sessionClasses" type="checkbox" checked><span>Count as a class <small>Included in your classes rollup</small></span></label>
+    <button class="save-button" id="saveEntry" type="submit">SAVE SESSION</button>
+    <button class="delete-button" id="deleteEntry" type="button" hidden>DELETE THIS ENTRY</button>
+  </form>
+</section>
+<section id="settingsSheet" class="bottom-sheet settings-sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" hidden>
+  <div class="sheet-grabber" aria-hidden="true"></div>
+  <div class="sheet-head"><div><div class="eyebrow">YOUR DATA</div><h2 id="settingsTitle">Backups & storage</h2></div><button class="close-button" id="closeSettings" type="button" aria-label="Close">×</button></div>
+  <p class="settings-explain">Your entries are saved in this browser on this device. GitHub Pages does not automatically sync changes between your phone and other devices.</p>
+  <div class="settings-actions">
+    <button type="button" id="exportJson"><span>Download full backup</span><small>JSON · all sessions, history, and rollups</small></button>
+    <button type="button" id="exportCsv"><span>Export session spreadsheet</span><small>CSV · individual training entries</small></button>
+    <button type="button" id="importJson"><span>Import a backup</span><small>JSON · merges entries by ID</small></button>
+    <button type="button" id="resetData" class="danger-action"><span>Restore original dataset</span><small>Removes all edits and newly added sessions on this device</small></button>
+  </div>
+  <input id="importFile" hidden type="file" accept=".json,application/json">
+  <p class="settings-footnote">Back up regularly if this is your primary training log. Clearing Safari website data can erase local entries. Private browsing is not recommended.</p>
+</section>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script defer src="./app.js?v=1"></script>
+</body>
+</html>
